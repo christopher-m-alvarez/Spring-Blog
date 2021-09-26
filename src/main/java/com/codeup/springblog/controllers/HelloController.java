@@ -1,6 +1,7 @@
 package com.codeup.springblog.controllers;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,20 +24,34 @@ public class HelloController {
     }
 
     @GetMapping("/happy_birthday/{username}/{age}")
-    @ResponseBody
-    public String happyBirthday(@PathVariable String username,
-                             @PathVariable int age
+    public String happyBirthday(
+            @PathVariable String username,
+            @PathVariable int age,
+            Model model
     ){
-        return "Happy Birthday, " + username + " You are now " + age + " years old!"  ;
+        model.addAttribute("name", username);
+        model.addAttribute("age", age);
+        return "HappyBirthday";
     }
 
+
     @GetMapping("/random/number")
-    @ResponseBody
-    public int RandomNumber(){
+    public String RandomNumber(Model model){
         Random r = new Random();
         int low = 10;
         int high = 100;
-        return r.nextInt(high-low) + low;
+        int randomNumber = r.nextInt(high-low) + low;
+        model.addAttribute("num",randomNumber);
+
+        return "random";
+    }
+
+    @GetMapping("/weather")
+    public String viewWeather(Model model){
+        String[] weatherInfo = {"Hot", "Humid", "Cloudy", "Hazy", "98F"};
+
+        model.addAttribute("weatherStats",weatherInfo);
+        return "WeatherPage";
     }
 
 }
