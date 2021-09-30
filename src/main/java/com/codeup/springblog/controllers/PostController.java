@@ -4,6 +4,7 @@ import com.codeup.springblog.models.Post;
 import com.codeup.springblog.models.User;
 import com.codeup.springblog.repos.PostRepository;
 import com.codeup.springblog.repos.UserRepository;
+import com.codeup.springblog.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,10 +19,12 @@ public class PostController {
 
    private final PostRepository postDao;
    private final UserRepository userDao;
+   private final EmailService emailService;
 
-    public PostController(PostRepository postDao, UserRepository userDao) {
+    public PostController(PostRepository postDao, UserRepository userDao, EmailService emailService) {
         this.postDao = postDao;
         this.userDao = userDao;
+        this.emailService = emailService;
     }
 
     @GetMapping("/posts")
@@ -49,6 +52,12 @@ public class PostController {
     public String createPost(@ModelAttribute Post postToAdd
     ) {
         postToAdd.setOwner(userDao.getById(1L));
+
+        emailService.prepareAndSend(
+                postToAdd,
+                "new post",
+                "You created a new post!"
+                );
 
         postDao.save(postToAdd);
         return "redirect:/posts";
