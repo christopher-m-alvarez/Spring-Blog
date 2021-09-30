@@ -16,12 +16,13 @@ import java.util.List;
 
 public class PostController {
 
-    @Autowired
-    private PostRepository postDao;
+   private final PostRepository postDao;
+   private final UserRepository userDao;
 
-    @Autowired
-    private UserRepository userDao;
-
+    public PostController(PostRepository postDao, UserRepository userDao) {
+        this.postDao = postDao;
+        this.userDao = userDao;
+    }
 
     @GetMapping("/posts")
     public String showPosts(Model model) {
@@ -39,39 +40,35 @@ public class PostController {
     }
 
     @GetMapping("/posts/create")
-    public String showCreatePostForm() {
+    public String showCreatePostForm(Model model) {
+        model.addAttribute("post", new Post());
         return "post/create";
     }
 
     @PostMapping("/posts/create")
-    public String createPost(
-            @RequestParam(name = "title") String title,
-            @RequestParam(name = "body") String body
+    public String createPost(@ModelAttribute Post postToAdd
     ) {
-        User hardCodedUser = userDao.getById(1L);
+        postToAdd.setOwner(userDao.getById(1L));
 
-        Post postToSubmit = new Post(title,body, hardCodedUser);
-
-        postDao.save(postToSubmit);
-
+        postDao.save(postToAdd);
         return "redirect:/posts";
     }
 
     @GetMapping("/posts/edit/{id}")
     public String showEditPostForm(@PathVariable long id, Model model) {
         Post postToEdit = postDao.getById(id);
-        model.addAttribute("id", postToEdit.getId());
+        model.addAttribute("postToEdit", postToEdit);
         return "post/edit";
     }
 
     @PostMapping("/posts/edit/{id}")
     public String editPost(
             @PathVariable long id,
-            @RequestParam(name = "title") String title,
-            @RequestParam(name = "body") String body
+            @ModelAttribute Post updatedPost
     ) {
-        Post editedPost = new Post(id, title, body);
-        postDao.save(editedPost);
+        updatedPost.setId(id);
+        updatedPost.setOwner(userDao.getById(1L));
+        postDao.save(updatedPost);
 
         return "redirect:/posts";
 
